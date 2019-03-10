@@ -27,9 +27,9 @@ public class Block {
     private String hash;
     private Timestamp timestamp;
     private String data;
-    private String signature;
+//    private String signature;
 
-    public Block(int index, String previousHash, String hash, String data, String signature){
+    public Block(int index, String previousHash, String hash, String data){
         
     }
     
@@ -49,9 +49,9 @@ public class Block {
         return data;
     }
 
-    public String getSignature() {
-        return signature;
-    }
+//    public String getSignature() {
+//        return signature;
+//    }
 }
 
 
