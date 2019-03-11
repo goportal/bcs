@@ -12,16 +12,14 @@ import java.util.Date;
  */
 public class Node {
 
-//    private Socket getSocket(){
-//        Socket client = new Socket();
-//        try{
-//            ServerSocket server = new ServerSocket(7001);
-//            client = server.accept(); 
-//        }catch(Exception X){
-//            System.out.println("Socket Error");
-//        }
-//        return client;
-//    }
+    
+    
+    
+    
+    
+    
+    
+    
 //    TCP server
     public void server() {
         System.out.println("here0");

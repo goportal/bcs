@@ -22,8 +22,51 @@ public class Chain {
         chain.add(genesis);
     }
     
-    private void addBlock(Block block) {
+    public int getIndex(){
+        return chain.size()+1;
+    }
+    
+    public void addBlock(Block block) {
         chain.add(block);
     }
-
+    
+    public boolean isValid(){
+        int sum = 0;
+        for(int i=0;i<chain.size();i++){
+           Block CB = chain.get(i);
+           String CH = utils.SHA256(""+CB.getIndex()+CB.getTimestamp()+CB.getPreviousHash()+CB.getData());
+           
+           if(!CB.getHash().equals(CH)){
+               return false;
+           }else{
+               if(CB.getIndex()>0 && !chain.get(i-1).getHash().equals(CB.getPreviousHash())){
+                   return false;
+               }else{
+                   sum++;
+               }
+           }
+        }
+        if(sum == chain.size()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    public void printChain(){
+        for(int i=0;i<chain.size();i++){
+            
+            Block currentBlock = chain.get(i);
+            
+            System.out.println(" ---------------------------------------------------- ");
+            System.out.println(" Index: "+currentBlock.getIndex());
+            System.out.println(" Previous hash: "+currentBlock.getPreviousHash());
+            System.out.println(" Hash: "+currentBlock.getHash());
+            System.out.println(" Timestamp: "+currentBlock.getTimestamp().toString());
+            System.out.println(" Data: "+currentBlock.getData());
+            System.out.println(" ---------------------------------------------------- ");
+            
+        }
+    }
+    
 }

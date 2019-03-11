@@ -1,20 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-//        self.index = index
-//        self.previousHash = previousHash
-//        self.timestamp = timestamp
-//        self.data = data
-//        self.signature = signature
-
-// Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-
 package org.bcs;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
+
 
 /**
  *
@@ -30,7 +17,15 @@ public class Block {
 //    private String signature;
 
     public Block(int index, String previousHash, String hash, String data){
-        
+        this.index = index;
+        this.previousHash = previousHash;
+        this.hash = hash;
+        this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.data = data;
+    }
+    
+    public String getHash(){
+        return hash;
     }
     
     public int getIndex() {
