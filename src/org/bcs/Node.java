@@ -1,11 +1,9 @@
 package org.bcs;
 
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 import java.util.Scanner;
+
 
 /**
  *
@@ -15,6 +13,8 @@ public class Node {
 
     Utils utils = new Utils();
     Chain blockchain = new Chain();
+    Server cServer = new Server();
+    Thread server = new Thread(cServer);
     Scanner sysIn = new Scanner(System.in);
 
     public void run() {
@@ -28,6 +28,10 @@ public class Node {
             System.out.println(" 3 - Check for blockchain updates");
             System.out.println(" 4 - Tamper the chain");
             System.out.println(" 5 - Exit");
+            System.out.println(" 6 - Start a server");
+            System.out.println(" 7 - Start a client");
+            
+            
             int option = Integer.parseInt(sysIn.nextLine());
 
             switch (option) {
@@ -42,6 +46,8 @@ public class Node {
                     Block newBlock = new Block(index, previousHash, hash, data);
 
                     blockchain.addBlock(newBlock);
+                    
+                    sendNodesUpdate(newBlock);
 
                     break;
 
@@ -75,7 +81,19 @@ public class Node {
                     break;
 
                 case 5:
+                    stopServer();
+                    
                     run = false;
+                    break;
+                    
+                case 6:
+                    startServer();
+                    break;
+                
+                case 7:
+                    System.out.println("Which IP?");
+                    String ip = sysIn.nextLine();
+                    //client(ip);
                     break;
 
                 default:
@@ -88,43 +106,17 @@ public class Node {
     }
 
 //    TCP server
-    public void server() {
-        System.out.println("here0");
-        try {
-            // Instancia o ServerSocket ouvindo a porta 7001
-            System.out.println("here");
-            ServerSocket servidor = new ServerSocket(7001);
-            System.out.println("Servidor ouvindo a porta 7001");
-            while (true) {
-                // o método accept() bloqueia a execução até que o servidor receba um pedido de conexão
-                Socket client = servidor.accept();
-                System.out.println("Cliente conectado: " + client.getInetAddress().getHostAddress());
-                ObjectOutputStream saida = new ObjectOutputStream(client.getOutputStream());
-                saida.flush();
-                saida.writeObject(new Date());
-                saida.close();
-                client.close();
-            }
-        } catch (Exception e) {
-            System.out.println("Erro: " + e.getMessage());
-        }
+    public void startServer() {
+        server.start();
     }
-
-//    TCP client
-    public void client(String ip) {
-        System.out.println("here0");
-        try {
-            Socket cliente = new Socket(ip, 7001);
-            System.out.println("here");
-            ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
-            Date data_atual = (Date) entrada.readObject();
-            System.out.println("Data recebida do servidor:" + data_atual.toString());
-            //JOptionPane.showMessageDialog(null, "Data recebida do servidor:" + data_atual.toString());
-            entrada.close();
-            System.out.println("Conexão encerrada");
-        } catch (Exception e) {
-            System.out.println("Erro: " + e.getMessage());
-        }
+    
+    public void stopServer(){
+        System.exit(0);
+    }
+    
+    public void sendNodesUpdate(Block tempBlock){
+//        server
+        cServer.sendNodesUpdate(tempBlock);
     }
 
 }

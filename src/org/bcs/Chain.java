@@ -2,6 +2,8 @@ package org.bcs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -62,6 +64,12 @@ public class Chain {
     }
     
     public void printChain(){
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Chain.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("THREAD ERROR");
+        }
         for(int i=0;i<chain.size();i++){
             
             Block currentBlock = chain.get(i);
