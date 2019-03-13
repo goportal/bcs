@@ -14,16 +14,24 @@ import java.util.List;
 public class Chain {
 
     Utils utils = new Utils();
-    List<Block> chain = new ArrayList<>();
+    private List<Block> chain = new ArrayList<>();
 
-    public void Chain(){
+    public Chain(){
         String hash = utils.SHA256("0"+"0"+"this is the genesis");
         Block genesis = new Block(0,"0",hash,"this is the genesis");
         chain.add(genesis);
     }
     
     public int getIndex(){
-        return chain.size()+1;
+        return chain.size();
+    }
+    
+    public Block getBlock(int n){
+        return chain.get(n);
+    }
+    
+    public String getCanonicalHash(){
+        return chain.get(chain.size()-1).getHash();
     }
     
     public void addBlock(Block block) {
@@ -68,5 +76,22 @@ public class Chain {
             
         }
     }
+    
+    
+//    This code snippet its just for research purpose, and should be removed to use.
+    
+    public void tamper(int nBlock, String newContent){
+        
+        String data = newContent;
+        int index = nBlock;
+        String previousHash = chain.get(nBlock).getPreviousHash();
+        String hash = chain.get(nBlock).getHash();
+
+        Block newBlock = new Block(index, previousHash, hash, data);
+
+        chain.set(nBlock, newBlock);
+        
+    }
+    
     
 }

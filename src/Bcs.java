@@ -26,13 +26,18 @@ public class Bcs {
 //            node.client(cont);
 //        }
 
-        System.out.println(" - Insert the text to encrypt");
-        String cont = sc.nextLine();
-        String cypher = utils.SHA256(cont);
+
+//        System.out.println(" - Insert the text to encrypt");
+//        String cont = sc.nextLine();
+//        String cypher = utils.SHA256(cont);
+//        
+//        System.out.println("\n The cypher is: "+cypher+"\n");
+//        
+//        System.out.println("Ending test");
+
+
         
-        System.out.println("\n The cypher is: "+cypher+"\n");
-        
-        System.out.println("Ending test");
+        node.run();
     }
     
 }
