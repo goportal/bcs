@@ -1,9 +1,8 @@
 package org.bcs;
 
-import java.io.ObjectInputStream;
-import java.net.Socket;
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.Scanner;
-
 
 /**
  *
@@ -14,7 +13,7 @@ public class Node {
     Utils utils = new Utils();
     Chain blockchain = new Chain();
     Server cServer = new Server();
-    Thread server = new Thread(cServer);
+//    Thread server = new Thread(cServer);
     Scanner sysIn = new Scanner(System.in);
 
     public void run() {
@@ -28,10 +27,10 @@ public class Node {
             System.out.println(" 3 - Check for blockchain updates");
             System.out.println(" 4 - Tamper the chain");
             System.out.println(" 5 - Exit");
-            System.out.println(" 6 - Start a server");
-            System.out.println(" 7 - Start a client");
-            
-            
+//            System.out.println(" 6 - Start a server");
+            System.out.println(" 7 - Connect to server");
+            System.out.println(" 8 - List connected nodes");
+
             int option = Integer.parseInt(sysIn.nextLine());
 
             switch (option) {
@@ -41,12 +40,13 @@ public class Node {
 
                     int index = blockchain.getIndex();
                     String previousHash = blockchain.getCanonicalHash();
-                    String hash = utils.SHA256("" + index + previousHash + data);
+                    Timestamp timest = new Timestamp(System.currentTimeMillis());
+                    String hash = utils.SHA256("" + index + previousHash + timest + data);
 
-                    Block newBlock = new Block(index, previousHash, hash, data);
+                    Block newBlock = new Block(index, previousHash, hash, timest, data);
 
                     blockchain.addBlock(newBlock);
-                    
+
                     sendNodesUpdate(newBlock);
 
                     break;
@@ -69,31 +69,40 @@ public class Node {
                     break;
 
                 case 4:
-                    
+
                     System.out.println("Which Block?");
                     int nBlock = Integer.parseInt(sysIn.nextLine());
-                    
+
                     System.out.println("Insert the new content:");
                     String newContent = sysIn.nextLine();
-                    
+
                     blockchain.tamper(nBlock, newContent);
-                    
+
                     break;
 
                 case 5:
                     stopServer();
-                    
+
                     run = false;
                     break;
-                    
-                case 6:
-                    startServer();
-                    break;
-                
+
+//                case 6:
+//                    startServer();
+//                    break;
+
                 case 7:
-                    System.out.println("Which IP?");
-                    String ip = sysIn.nextLine();
-                    //client(ip);
+                    System.out.println("Which ip:");
+                    cServer.connect(sysIn.nextLine());
+                    break;
+
+                case 8:
+
+                    List<String> connectedNodes = cServer.getConnectedNodes();
+
+                    for (int i = 0; i < connectedNodes.size(); i++) {
+                        System.err.println("Node: " + i + "  Ip: " + connectedNodes.get(i));
+                    }
+
                     break;
 
                 default:
@@ -106,15 +115,15 @@ public class Node {
     }
 
 //    TCP server
-    public void startServer() {
-        server.start();
-    }
-    
-    public void stopServer(){
+//    public void startServer() {
+//        server.start();
+//    }
+
+    public void stopServer() {
         System.exit(0);
     }
-    
-    public void sendNodesUpdate(Block tempBlock){
+
+    public void sendNodesUpdate(Block tempBlock) {
 //        server
         cServer.sendNodesUpdate(tempBlock);
     }

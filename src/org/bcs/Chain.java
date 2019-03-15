@@ -1,9 +1,8 @@
 package org.bcs;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -19,8 +18,9 @@ public class Chain {
     private List<Block> chain = new ArrayList<>();
 
     public Chain(){
-        String hash = utils.SHA256("0"+"0"+"this is the genesis");
-        Block genesis = new Block(0,"0",hash,"this is the genesis");
+        Timestamp timest = new Timestamp(System.currentTimeMillis());
+        String hash = utils.SHA256("0"+"0"+timest+"this is the genesis");
+        Block genesis = new Block(0,"0",hash,timest,"this is the genesis");
         chain.add(genesis);
     }
     
@@ -44,8 +44,8 @@ public class Chain {
         int sum = 0;
         for(int i=0;i<chain.size();i++){
            Block CB = chain.get(i);
-           String CH = utils.SHA256(""+CB.getIndex()+CB.getTimestamp()+CB.getPreviousHash()+CB.getData());
-           
+           String CH = utils.SHA256(""+CB.getIndex()+CB.getPreviousHash()+CB.getTimestamp()+CB.getData());
+
            if(!CB.getHash().equals(CH)){
                return false;
            }else{
@@ -64,12 +64,6 @@ public class Chain {
     }
     
     public void printChain(){
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Chain.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("THREAD ERROR");
-        }
         for(int i=0;i<chain.size();i++){
             
             Block currentBlock = chain.get(i);
@@ -93,9 +87,10 @@ public class Chain {
         String data = newContent;
         int index = nBlock;
         String previousHash = chain.get(nBlock).getPreviousHash();
+        Timestamp timest = chain.get(nBlock).getTimestamp();
         String hash = chain.get(nBlock).getHash();
 
-        Block newBlock = new Block(index, previousHash, hash, data);
+        Block newBlock = new Block(index, previousHash, hash, timest, data);
 
         chain.set(nBlock, newBlock);
         

@@ -1,5 +1,6 @@
 package org.bcs;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 
@@ -8,7 +9,7 @@ import java.sql.Timestamp;
  * @author Portal
  */
 
-public class Block {
+public class Block implements Serializable{
     private int index;
     private String previousHash;
     private String hash;
@@ -16,11 +17,11 @@ public class Block {
     private String data;
 //    private String signature;
 
-    public Block(int index, String previousHash, String hash, String data){
+    public Block(int index, String previousHash, String hash, Timestamp timestamp, String data){
         this.index = index;
         this.previousHash = previousHash;
         this.hash = hash;
-        this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.timestamp = timestamp;
         this.data = data;
     }
     
