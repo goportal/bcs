@@ -12,7 +12,9 @@ public class Node {
 
     Utils utils = new Utils();
     Chain blockchain = new Chain();
-    Server cServer = new Server();
+//    Server cServer = new Server();
+    P2p network = new P2p();
+    
 //    Thread server = new Thread(cServer);
     Scanner sysIn = new Scanner(System.in);
 
@@ -92,18 +94,19 @@ public class Node {
 
                 case 7:
                     System.out.println("Which ip:");
-                    cServer.connect(sysIn.nextLine());
+//                    cServer.connect(sysIn.nextLine());
+                    network.connect(sysIn.nextLine());
                     break;
 
-                case 8:
-
-                    List<String> connectedNodes = cServer.getConnectedNodes();
-
-                    for (int i = 0; i < connectedNodes.size(); i++) {
-                        System.err.println("Node: " + i + "  Ip: " + connectedNodes.get(i));
-                    }
-
-                    break;
+//                case 8:
+//
+//                    List<String> connectedNodes = cServer.getConnectedNodes();
+//
+//                    for (int i = 0; i < connectedNodes.size(); i++) {
+//                        System.err.println("Node: " + i + "  Ip: " + connectedNodes.get(i));
+//                    }
+//
+//                    break;
 
                 default:
                     System.out.println("Wrong choice! try again.");
@@ -125,7 +128,8 @@ public class Node {
 
     public void sendNodesUpdate(Block tempBlock) {
 //        server
-        cServer.sendNodesUpdate(tempBlock);
+//        cServer.sendNodesUpdate(tempBlock);
+        network.publish(tempBlock);
     }
 
 }
