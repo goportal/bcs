@@ -1,14 +1,11 @@
 package org.bcs;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -31,35 +28,50 @@ public class P2p {
 
                 while (true) {
                     Socket tempNode = server.accept();
-                    nodes.add(tempNode);
-//                    addNode(tempNode);
-                    ObjectInputStream input = new ObjectInputStream(tempNode.getInputStream());
-
-                    new Thread(() -> {
-                        try {
-                            while (true) {
-                                Block newBlock = (Block) input.readObject();
-                                System.out.println("new block data:" + newBlock.getData());
-                            }
-                        } catch (Exception X) {
-                            System.err.println("ERROR: " + X.getMessage());
+                    boolean alreadylinked = false;
+                    for (int i = 0; i < nodes.size(); i++) {
+                        if (tempNode.getInetAddress().getHostAddress().equals(nodes.get(i).getInetAddress().getHostAddress())) {
+                            alreadylinked = true;
+                            System.out.println("you are at the level 1: "+nodes.get(i).getInetAddress().getHostAddress());
                         }
-                    }).start();
+                    }
+                    if (!alreadylinked) {
+                        System.out.println("you are at the level 2");
+                        connect(tempNode.getInetAddress().getHostAddress());
+                        nodes.add(tempNode);
 
-                    System.out.println("New node added: " + tempNode.getInetAddress().getHostAddress());
+//                    addNode(tempNode);
+                        ObjectInputStream input = new ObjectInputStream(tempNode.getInputStream());
+
+                        new Thread(() -> {
+                            try {
+                                while (true) {
+                                    Block newBlock = (Block) input.readObject();
+//                                    ToDo implement what happens when a new block is added;
+                                    System.out.println("new block data:" + newBlock.getData());
+                                }
+                            } catch (Exception X) {
+                                System.err.println("ERROR: " + X.getMessage());
+                            }
+                        }).start();
+
+                        System.out.println("New node added: " + tempNode.getInetAddress().getHostAddress());
+                    }
                 }
+
             } catch (Exception e) {
                 System.out.println("Erro: " + e.getMessage());
             }
 
-        }).start();
+        }
+        ).start();
     }
 
     public void connect(String ip) {
 //        new Thread(() -> {
         try {
             Socket client = new Socket(ip, 7001);
-            nodes.add(client);
+//            nodes.add(client);
 
 //            ObjectInputStream input = new ObjectInputStream(client.getInputStream());
 //
@@ -73,7 +85,6 @@ public class P2p {
 //                    System.err.println("ERROR: " + X.getMessage());
 //                }
 //            }).start();
-
             ObjectOutputStream output = new ObjectOutputStream(client.getOutputStream());
             output.flush();
 
