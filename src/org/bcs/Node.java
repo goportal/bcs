@@ -13,7 +13,7 @@ public class Node {
     Utils utils = new Utils();
     Chain blockchain = new Chain();
 //    Server cServer = new Server();
-    P2p network = new P2p();
+    P2p p2p = new P2p();
     
 //    Thread server = new Thread(cServer);
     Scanner sysIn = new Scanner(System.in);
@@ -49,7 +49,7 @@ public class Node {
 
                     blockchain.addBlock(newBlock);
 
-                    sendNodesUpdate(newBlock);
+                    p2p.publish(newBlock);
 
                     break;
 
@@ -83,7 +83,7 @@ public class Node {
                     break;
 
                 case 5:
-                    stopServer();
+                    System.exit(0);
 
                     run = false;
                     break;
@@ -95,7 +95,7 @@ public class Node {
                 case 7:
                     System.out.println("Which ip:");
 //                    cServer.connect(sysIn.nextLine());
-                    network.connect(sysIn.nextLine());
+                    p2p.connect(sysIn.nextLine());
                     break;
 
 //                case 8:
@@ -121,15 +121,5 @@ public class Node {
 //    public void startServer() {
 //        server.start();
 //    }
-
-    public void stopServer() {
-        System.exit(0);
-    }
-
-    public void sendNodesUpdate(Block tempBlock) {
-//        server
-//        cServer.sendNodesUpdate(tempBlock);
-        network.publish(tempBlock);
-    }
 
 }
