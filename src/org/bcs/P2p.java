@@ -1,14 +1,11 @@
 package org.bcs;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -32,20 +29,23 @@ public class P2p {
                 while (true) {
 
                     Socket tempNode = server.accept();
-
+                    
                     String tempNodeIp = tempNode.getInetAddress().getHostAddress();
 
                     if (!nodesIp.contains(tempNodeIp)) {
                         
                         nodesIp.add(tempNodeIp);
                         connect(tempNodeIp);
-                        
+        
                         ObjectInputStream input = new ObjectInputStream(tempNode.getInputStream());
 
                         new Thread(() -> {
                             try {
                                 while (true) {
                                     Block newBlock = (Block) input.readObject();
+
+//                                    ToDo implement what happens when a new block is added;
+
                                     System.out.println("new block data:" + newBlock.getData());
                                 }
                             } catch (Exception X) {
@@ -56,19 +56,22 @@ public class P2p {
                         System.out.println("New node added: " + tempNode.getInetAddress().getHostAddress());
                     }
                 }
+
             } catch (Exception e) {
                 System.out.println("Erro: " + e.getMessage());
             }
 
-        }).start();
+        }
+        ).start();
     }
 
     public void connect(String ip) {
-
+        
 //        if (!nodesIp.contains(ip)) {
             
             try {
                 Socket client = new Socket(ip, 7001);
+
 //            nodes.add(client);
 
 //            ObjectInputStream input = new ObjectInputStream(client.getInputStream());
@@ -83,10 +86,12 @@ public class P2p {
 //                    System.err.println("ERROR: " + X.getMessage());
 //                }
 //            }).start();
+
                 ObjectOutputStream output = new ObjectOutputStream(client.getOutputStream());
                 output.flush();
 
                 outputs.add(output);
+
 
                 System.out.println("Connected to the server in: " + ip);
 
