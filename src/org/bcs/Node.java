@@ -13,13 +13,15 @@ public class Node {
     Utils utils = new Utils();
     Chain blockchain = new Chain();
 //    Server cServer = new Server();
-    P2p p2p = new P2p();
+    P2p p2p = new P2p(this);
     
 //    Thread server = new Thread(cServer);
     Scanner sysIn = new Scanner(System.in);
 
+    int doTest = 0;
+    
     public void run() {
-
+        doTest=1;
         boolean run = true;
         do {
             System.out.println("Choose the option:");
@@ -117,6 +119,14 @@ public class Node {
 
     }
 
+    public void consensus(Block block){
+        
+        
+        
+        blockchain.addBlock(block);
+        
+    }
+    
 //    TCP server
 //    public void startServer() {
 //        server.start();

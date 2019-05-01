@@ -18,7 +18,7 @@ public class P2p {
     private List<ObjectOutputStream> outputs = new ArrayList<>();
 //    private List<ObjectInputStream> inputs = new ArrayList<>();
 
-    public P2p() {
+    public P2p(Node node) {
         new Thread(() -> {
 
             try {
@@ -43,8 +43,10 @@ public class P2p {
                             try {
                                 while (true) {
                                     Block newBlock = (Block) input.readObject();
-
+                                    
 //                                    ToDo implement what happens when a new block is added;
+
+                                    node.consensus(newBlock);
 
                                     System.out.println("new block data:" + newBlock.getData());
                                 }
