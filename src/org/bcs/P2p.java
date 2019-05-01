@@ -48,7 +48,7 @@ public class P2p {
 
                                     node.consensus(newBlock);
 
-                                    System.out.println("new block data:" + newBlock.getData());
+                                    System.out.println("New block data:" + newBlock.getData());
                                 }
                             } catch (Exception X) {
                                 System.err.println("ERROR: " + X.getMessage());
@@ -119,6 +119,10 @@ public class P2p {
         } catch (Exception X) {
             System.err.println("ERROR: " + X.getMessage());
         }
+    }
+    
+    public List<String> getNodesIp(){
+        return nodesIp;
     }
 
 //    

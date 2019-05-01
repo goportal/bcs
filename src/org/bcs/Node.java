@@ -28,12 +28,12 @@ public class Node {
             System.out.println(" 0 - Add a new block");
             System.out.println(" 1 - Print the blockchain");
             System.out.println(" 2 - Validate chain");
-            System.out.println(" 3 - Check for blockchain updates");
-            System.out.println(" 4 - Tamper the chain");
-            System.out.println(" 5 - Exit");
+//            System.out.println(" 3 - Check for blockchain updates");
+            System.out.println(" 3 - Tamper the chain");
+            System.out.println(" 4 - Exit");
 //            System.out.println(" 6 - Start a server");
-            System.out.println(" 7 - Connect to server");
-            System.out.println(" 8 - List connected nodes");
+            System.out.println(" 5 - Connect to peer");
+            System.out.println(" 6 - List connected nodes");
 
             int option = Integer.parseInt(sysIn.nextLine());
 
@@ -68,11 +68,11 @@ public class Node {
                     }
                     break;
 
-                case 3:
-                    System.out.println("Bueller?");
-                    break;
+//                case 3:
+//                    System.out.println("Bueller?");
+//                    break;
 
-                case 4:
+                case 3:
 
                     System.out.println("Which Block?");
                     int nBlock = Integer.parseInt(sysIn.nextLine());
@@ -84,7 +84,7 @@ public class Node {
 
                     break;
 
-                case 5:
+                case 4:
                     System.exit(0);
 
                     run = false;
@@ -94,10 +94,20 @@ public class Node {
 //                    startServer();
 //                    break;
 
-                case 7:
+                case 5:
                     System.out.println("Which ip:");
 //                    cServer.connect(sysIn.nextLine());
                     p2p.connect(sysIn.nextLine());
+                    break;
+                    
+                case 6:
+                    List<String> nodesIp = p2p.getNodesIp();
+                    
+                    System.out.println("Connected nodes: ");
+                    for (int i = 0; i < nodesIp.size(); i++) {
+                        System.out.println(nodesIp.get(i));
+                    }
+
                     break;
 
 //                case 8:
@@ -113,6 +123,7 @@ public class Node {
                 default:
                     System.out.println("Wrong choice! try again.");
                     break;
+                   
             }
 
         } while (run);
@@ -120,11 +131,10 @@ public class Node {
     }
 
     public void consensus(Block block){
-        
-        
-        
-        blockchain.addBlock(block);
-        
+        if(!blockchain.haveBlock(block.getHash())){
+            blockchain.addBlock(block);
+            p2p.publish(block);
+        }  
     }
     
 //    TCP server
