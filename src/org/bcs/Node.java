@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,7 +14,15 @@ import java.util.Scanner;
  */
 public class Node {
 
+    private List<Block> underVote = new ArrayList<>();
+    private List<Ballot> ballots = new ArrayList<>();
+    
+    
     Utils utils = new Utils();
+    
+    KeyPair keypair = utils.generateKeyPair();
+    PublicKey nodeId = keypair.getPublic();
+    
     Chain blockchain = new Chain();
 //    Server cServer = new Server();
     P2p p2p = new P2p(this);
@@ -23,9 +32,13 @@ public class Node {
 
     int doTest = 0;
     
+//    private List<String> qSlices = new ArrayList<>();
+    
     public void run() {
+        
         doTest=1;
         boolean run = true;
+        
         do {
             System.out.println("Choose the option:");
             System.out.println(" 0 - Add a new block");
@@ -37,8 +50,8 @@ public class Node {
 //            System.out.println(" 6 - Start a server");
             System.out.println(" 5 - Connect to peer");
             System.out.println(" 6 - List connected nodes");
-            
-            System.out.println("7 - KeyPair test");
+            System.out.println(" 7 - KeyPair test");
+            System.out.println(" 8 - Connect to slice");
             
 
             int option = Integer.parseInt(sysIn.nextLine());
@@ -55,8 +68,10 @@ public class Node {
 
                     Block newBlock = new Block(index, previousHash, hash, timest, data);
 
-                    blockchain.addBlock(newBlock);
-
+//                    blockchain.addBlock(newBlock);
+                   
+                    this.underVote.add(newBlock);
+                    
                     p2p.publish(newBlock);
 
                     break;
@@ -138,6 +153,12 @@ public class Node {
                     
                     break;
 
+                case 8:
+                    
+//                    connectToSlice(sysIn.nextLine());
+                    
+                    break;
+                    
                 default:
                     System.out.println("Wrong choice! try again.");
                     break;
@@ -148,12 +169,62 @@ public class Node {
 
     }
 
-    public void consensus(Block block){
-        if(!blockchain.haveBlock(block.getHash())){
-            blockchain.addBlock(block);
-            p2p.publish(block);
-        }  
+    public void connectToSlice(String sliceName){
+//        this.qSlices.add(sliceName);
     }
+    
+    public void consensus(Object message){
+        Block block;
+        Ballot ballot;
+        
+        if(message instanceof Block){
+            block = (Block) message;
+            
+            if(!blockchain.haveBlock(block.getHash())){
+                if(!underVote.contains(block)){
+                    underVote.add(block);
+                    Ballot vote = new Ballot(this.nodeId, block.getHash(),"_vote_");
+                    
+                    ballots.add(vote);
+                    
+                    p2p.publish(block);
+                    p2p.publish(vote);
+                    
+                }
+                
+            }else{
+                if(ballots.size()>=3){
+                    this.blockchain.addBlock(block);
+                }
+            }
+            
+        }
+//        else{
+//            ballot = (Ballot) message;
+//            if(!alreadyVoted(ballot)){
+//                this.ballots.add(ballot);
+//            }
+//            if(!blockchain.haveBlock(ballot.blockId)){
+//                
+//            }
+//            // verifica porcentagem do consenso
+//        }
+    }
+    
+    
+    
+    public boolean alreadyVoted(Ballot vote){
+        for(int i=0;i<this.ballots.size();i++){
+            Ballot tempBallot = this.ballots.get(i); 
+            if(tempBallot.blockId.equals(vote.blockId) && tempBallot.nodeId.equals(vote.nodeId) && tempBallot.vote.equals("_vote_")){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+//    blockchain.addBlock(block);
     
 //    TCP server
 //    public void startServer() {

@@ -15,6 +15,8 @@ public class Bcs {
         Scanner sc = new Scanner(System.in); 
         Node node = new Node();
         
+        
+        
 //        System.out.println("- insert 0 to server \n- insert 1 to client");
 //        String cont = sc.nextLine();
 //        

@@ -42,13 +42,11 @@ public class P2p {
                         new Thread(() -> {
                             try {
                                 while (true) {
-                                    Block newBlock = (Block) input.readObject();
                                     
-//                                    ToDo implement what happens when a new block is added;
-
-                                    node.consensus(newBlock);
-
-                                    System.out.println("New block data:" + newBlock.getData());
+                                    node.consensus(input.readObject());
+                                    
+//                                    What happens when a new block is added
+                                    
                                 }
                             } catch (Exception X) {
                                 System.err.println("ERROR: " + X.getMessage());
@@ -120,6 +118,19 @@ public class P2p {
             System.err.println("ERROR: " + X.getMessage());
         }
     }
+    
+    public void publish(Ballot ballot){
+        try {
+//            System.out.println("hereeeee");
+            for (int i = 0; i < outputs.size(); i++) {
+//                System.out.println("hereeeee in :"+i);
+                outputs.get(i).writeObject(ballot);
+            }
+        } catch (Exception X) {
+            System.err.println("ERROR: " + X.getMessage());
+        }
+    }
+    
     
     public List<String> getNodesIp(){
         return nodesIp;
