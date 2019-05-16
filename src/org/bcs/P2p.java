@@ -46,6 +46,7 @@ public class P2p {
                                     Object tempObj = input.readObject();
                                     
                                     if(tempObj instanceof Block){
+//                                        System.out.println("HEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEEEE");
                                         Block tempBlock = (Block) tempObj;
                                         node.consensus(tempBlock);
                                     }else{

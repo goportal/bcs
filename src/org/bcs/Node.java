@@ -181,8 +181,10 @@ public class Node {
     private Ballot ballot;
     
     public void consensus(Block block){
-        if(!ether.contains(block)){
+        if(!this.etherHasBlock(block)){
+//            System.out.println("");
             ether.add(block);
+            p2p.publish(block);
         }
     }
     
@@ -193,11 +195,11 @@ public class Node {
         System.out.println("here 1");
         if(!blockchain.haveBlock(ether.get(0).getHash())){
             System.out.println("here 2");
-            ballot = new Ballot(ether.get(0).getHash(),type,TOTAL_NODES);
+            ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
             
-            if(!ballot.hasVoted(nodeId)){
+            if(!ballot.hasVoted(nodeId,type)){
                 System.out.println("here 3");
-                ballot.vote(this.nodeId);
+                ballot.vote(this.nodeId,type);
                 p2p.publish(ballot);
             }
             
@@ -208,17 +210,19 @@ public class Node {
     
     public void ballotConsensus(Ballot tempBallot){
         System.out.println("here 4");
-        if(!tempBallot.hasVoted(nodeId)){
+        
+        if(!tempBallot.hasVoted(nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()))){
             System.out.println("here 5");
-            if(!blockchain.haveBlock(tempBallot.blockId)){   
+            if(!blockchain.haveBlock(tempBallot.blockId)){
                 System.out.println("here 6");
-                tempBallot.vote(this.nodeId);
+                tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()));
                 this.ballot = tempBallot;
                 this.p2p.publish(ballot);
             }
-            if(ballot.ballotCanvass()){
+            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()))){
                 System.out.println("here 7");
-                if(ballot.vote.equals("_vote_")){
+                
+                if(ballot.hasVoted(this.nodeId,"_vote_")){
                     System.out.println("here 8");
                     startBallot("_accept_");
                 }else{
@@ -233,6 +237,16 @@ public class Node {
                 this.ballot = tempBallot;
                 this.p2p.publish(ballot);
             }
+            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()))){
+                System.out.println("here 7");
+                if(ballot.hasVoted(this.nodeId,"_vote_")){
+                    System.out.println("here 8");
+                    startBallot("_accept_");
+                }else{
+                    System.out.println("here 9");
+                    blockchain.addBlock(blockFromBallot(tempBallot));
+                }
+            }
         }
         
     }
@@ -246,6 +260,17 @@ public class Node {
             }
         }
         return tempBlock;
+    }
+    
+    public boolean etherHasBlock(Block tempBlock){
+        for (int i = 0; i < this.ether.size(); i++) {
+            if(this.ether.get(i).getHash().equals(tempBlock.getHash())){
+//                System.out.println("HASH 1 => "+this.ether.get(i).getHash());
+//                System.out.println("HASH 2 => "+tempBlock.getHash());
+                return true;
+            }
+        }
+        return false;
     }
     
 //    ArrayList< ArrayList > tempCounter = new ArrayList< ArrayList>();
