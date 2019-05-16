@@ -43,7 +43,15 @@ public class P2p {
                             try {
                                 while (true) {
                                     
-                                    node.consensus(input.readObject());
+                                    Object tempObj = input.readObject();
+                                    
+                                    if(tempObj instanceof Block){
+                                        Block tempBlock = (Block) tempObj;
+                                        node.consensus(tempBlock);
+                                    }else{
+                                        Ballot tempBallot = (Ballot) tempObj;
+                                        node.ballotConsensus(tempBallot);
+                                    }
                                     
 //                                    What happens when a new block is added
                                     
