@@ -27,6 +27,7 @@ public class Ballot implements Serializable{
     }
     
     public boolean hasVoted(PublicKey nodeId, String vote){
+//        System.out.println("heree: "+nodesSignature.size());
         for(int i=0;i<nodesSignature.size();i++){
             if(nodesSignature.get(i).equals(nodeId) && nodesVotes.get(i).equals(vote)){
                 return true;

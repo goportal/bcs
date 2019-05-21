@@ -50,8 +50,8 @@ public class Node {
 //            System.out.println(" 6 - Start a server");
             System.out.println(" 5 - Connect to peer");
             System.out.println(" 6 - List connected nodes");
-            System.out.println(" 7 - KeyPair test");
-            System.out.println(" 8 - Connect to slice");
+            System.out.println(" 7 - Print unvalidated blocks");
+            System.out.println(" 8 - Start Voting");
             
 
             int option = Integer.parseInt(sysIn.nextLine());
@@ -192,58 +192,60 @@ public class Node {
     
     public void startBallot(String type){
         
-        System.out.println("here 1");
-        if(!blockchain.haveBlock(ether.get(0).getHash())){
-            System.out.println("here 2");
-            ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
-            
-            if(!ballot.hasVoted(nodeId,type)){
-                System.out.println("here 3");
-                ballot.vote(this.nodeId,type);
-                p2p.publish(ballot);
+        System.out.println("Started new Ballot");
+        if(!ether.isEmpty()){   
+            if(!blockchain.haveBlock(ether.get(0).getHash())){
+                System.out.println("Valid ballot");
+                ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
+                
+                if(!ballot.hasVoted(nodeId,type)){
+                    System.out.println("Voting in new Ballot");
+                    ballot.vote(this.nodeId,type);
+                    p2p.publish(ballot);
+                }
+                
             }
-            
         }
         
 //        this.p2p.publish();
     }
     
     public void ballotConsensus(Ballot tempBallot){
-        System.out.println("here 4");
-        
-        if(!tempBallot.hasVoted(nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()))){
-            System.out.println("here 5");
+        System.out.println("Received a ballot");
+               
+        if(!tempBallot.hasVoted(nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
+            System.out.println("Ballot not voted");
             if(!blockchain.haveBlock(tempBallot.blockId)){
-                System.out.println("here 6");
-                tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()));
+                System.out.println("Voting in ballot: "+tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
+                tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
                 this.ballot = tempBallot;
                 this.p2p.publish(ballot);
             }
-            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()))){
-                System.out.println("here 7");
+            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
+                System.out.println("BALLOT REACH CONSENSUS");
                 
                 if(ballot.hasVoted(this.nodeId,"_vote_")){
-                    System.out.println("here 8");
+                    System.out.println("Starting _accept_ voting");
                     startBallot("_accept_");
                 }else{
-                    System.out.println("here 9");
+                    System.out.println("ADDING TO THE BLOCKCHAIN ");
                     blockchain.addBlock(blockFromBallot(tempBallot));
                 }
             }
         }else{
-            System.out.println("here 10");
+            System.out.println("Receiving already voted ballot");
             if(tempBallot.nodesSignature.size()>this.ballot.nodesSignature.size()){
-                System.out.println("here 11");
+                System.out.println("Updating local ballot");
                 this.ballot = tempBallot;
                 this.p2p.publish(ballot);
             }
-            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()))){
-                System.out.println("here 7");
+            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
+                System.out.println("BALLOT REACH CONSENSUS (by2)");
                 if(ballot.hasVoted(this.nodeId,"_vote_")){
-                    System.out.println("here 8");
+                    System.out.println("Starting _accept_ voting (by2)");
                     startBallot("_accept_");
                 }else{
-                    System.out.println("here 9");
+                    System.out.println("ADDING TO THE BLOCKCHAIN (by2)");
                     blockchain.addBlock(blockFromBallot(tempBallot));
                 }
             }
