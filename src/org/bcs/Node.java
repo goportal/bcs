@@ -17,8 +17,6 @@ public class Node {
 //    private List<Block> underVote = new ArrayList<>();
 //    private List<Ballot> ballots = new ArrayList<>();
     
-    
-    
     Utils utils = new Utils();
     
     KeyPair keypair = utils.generateKeyPair();
@@ -175,7 +173,7 @@ switch (option) {
     }
     
 //    public void connectToSlice(String sliceName){
-////        this.qSlices.add(sliceName);
+//        this.qSlices.add(sliceName);
 //    }
     
     private List<Block> ether = new ArrayList<>();
@@ -185,8 +183,8 @@ switch (option) {
     public void consensus(Block block){
         if(!this.etherHasBlock(block)){
 //            System.out.println("");
-ether.add(block);
-p2p.publish(block);
+            ether.add(block);
+            p2p.publish(block);
         }
     }
     
@@ -213,18 +211,28 @@ p2p.publish(block);
     boolean alreadyAccepted = false;
     
     public void ballotConsensus(Ballot tempBallot){
+        
+        
+        if(this.ballot != null){
+            if(!tempBallot.blockId.equals(ballot.blockId)){
+                this.ballot = tempBallot;
+            }
+        }
+        
+        
         System.out.println("Received a ballot");
         
         if(!tempBallot.hasVoted(nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
             System.out.println("Ballot not voted");
             if(!blockchain.haveBlock(tempBallot.blockId)){
 //                if(!this.alreadyAcceptedBlock(tempBallot.blockId)){
-                if(!alreadyAccepted){
-                    System.out.println("Voting in ballot: "+tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
-                    tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
-                    this.ballot = tempBallot;
-                    this.p2p.publish(ballot);
-                }
+//                    System.out.println("ALREADY ACCEPTED: "+this.alreadyAcceptedBlock(tempBallot.blockId));
+if(!alreadyAccepted){
+    System.out.println("Voting in ballot: "+tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
+    tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
+    this.ballot = tempBallot;
+    this.p2p.publish(ballot);
+}
 //                }
 
             }
@@ -242,6 +250,8 @@ this.p2p.publish(ballot);
                     if(!blockchain.haveBlock(tempBallot.blockId)){
                         System.out.println("ADDING TO THE BLOCKCHAIN ");
                         blockchain.addBlock(blockFromBallot(tempBallot));
+                        alreadyAccepted = false;
+//                        this.ballot = null;
                     }
                 }
             }
@@ -258,17 +268,18 @@ this.p2p.publish(ballot);
                     System.out.println("Voting to _accept_ (by2)");
 //                    tempBallot.vote(this.nodeId,"_accept_");
 //                    this.markAcceptedBlock(tempBallot.blockId);
-                    alreadyAccepted = true;
-                    this.ballot.vote(this.nodeId,"_accept_");
-                    this.p2p.publish(ballot);
+alreadyAccepted = true;
+this.ballot.vote(this.nodeId,"_accept_");
+this.p2p.publish(ballot);
 
 //                    startBallot("_accept_");
                 }else{
                     if(!blockchain.haveBlock(tempBallot.blockId)){
                         System.out.println("ADDING TO THE BLOCKCHAIN (by2)");
                         blockchain.addBlock(blockFromBallot(tempBallot));
+                        alreadyAccepted = false;
+//                        this.ballot = null;
                     }
-                    
                 }
             }
         }
@@ -310,7 +321,6 @@ return true;
     }
     
 //    ArrayList< ArrayList > tempCounter = new ArrayList< ArrayList>();
-    
     
 //    public boolean ballotCanvass(){
 //
