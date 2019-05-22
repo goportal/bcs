@@ -51,12 +51,18 @@ public class Ballot implements Serializable{
             }
         }
         
-        if(accepts >= ((nodes/3)*2)){
-            return true;
-        }else if(votes >= ((nodes/3)*2)){
-            return true;
+        if(voteType.equals("_vote_")){
+            if(votes >= ((nodes/3)*2)){
+                return true;
+            }
+        }else{
+            if(accepts >= ((nodes/3)*2)){
+                return true;
+            }
         }
+        
         return false;
+
     }
     
 }
