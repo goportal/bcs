@@ -51,7 +51,7 @@ public class P2p {
                                         node.consensus(tempBlock);
                                     }else{
                                         Ballot tempBallot = (Ballot) tempObj;
-                                        node.ballotConsensus(tempBallot);
+                                        node.receiveBallot(tempBallot);
                                     }
                                     
 //                                    What happens when a new block is added
