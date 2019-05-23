@@ -1,5 +1,11 @@
 package org.bcs;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -7,6 +13,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -163,23 +171,26 @@ switch (option) {
         
     case 9:
         
-        Ballot ballotin = new Ballot(ether.get(0).getHash(), 4);
-        Ballot ballotin2 = new Ballot(ether.get(0).getHash(), 4);
+        canvasVotes();
         
-        KeyPair keypair1 = utils.generateKeyPair();
-        String nodeId1 = getStringFromKeys(keypair1.getPublic());
         
-        KeyPair keypair2 = utils.generateKeyPair();
-        String nodeId2 = getStringFromKeys(keypair2.getPublic());
-        
-        KeyPair keypair3 = utils.generateKeyPair();
-        String nodeId3 = getStringFromKeys(keypair3.getPublic());
-        
-        KeyPair keypair4 = utils.generateKeyPair();
-        String nodeId4 = getStringFromKeys(keypair4.getPublic());
-        
-        ballotin.vote(nodeId1, "_vote_");
-        ballotin.vote(nodeId2, "_vote_");
+//        Ballot ballotin = new Ballot(ether.get(0).getHash(), 4);
+//        Ballot ballotin2 = new Ballot(ether.get(0).getHash(), 4);
+//        
+//        KeyPair keypair1 = utils.generateKeyPair();
+//        String nodeId1 = getStringFromKeys(keypair1.getPublic());
+//        
+//        KeyPair keypair2 = utils.generateKeyPair();
+//        String nodeId2 = getStringFromKeys(keypair2.getPublic());
+//        
+//        KeyPair keypair3 = utils.generateKeyPair();
+//        String nodeId3 = getStringFromKeys(keypair3.getPublic());
+//        
+//        KeyPair keypair4 = utils.generateKeyPair();
+//        String nodeId4 = getStringFromKeys(keypair4.getPublic());
+//        
+//        ballotin.vote(nodeId1, "_vote_");
+//        ballotin.vote(nodeId2, "_vote_");
 //        ballotin.vote(nodeId3, "_vote_");
 //        ballotin.vote(nodeId4, "_vote_");
         
@@ -204,7 +215,7 @@ switch (option) {
          
 //        ballotin.canvass("_vote_");
         
-        System.out.println(" canvas Vote: "+ballotin.canvass("_vote_"));
+//        System.out.println(" canvas Vote: "+ballotin.canvass("_vote_"));
         
 //        System.out.println(" NODE2 has voted: "+ballotin.hasVoted(nodeId2, "_vote_"));
         
@@ -250,11 +261,21 @@ switch (option) {
         if(!ether.isEmpty()){
             if(!blockchain.haveBlock(ether.get(0).getHash())){
                 
+                FileWriter fileWriter = null;
+                try {
+                    System.out.println("VOTED");
+                    fileWriter = new FileWriter("../../voting.txt", true);
+                    fileWriter.write("node:"+ether.get(0)+"\n");
+                    fileWriter.write("_vote_:"+this.nodeId+"\n");
+                    fileWriter.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
                 ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
-                ballot.vote(this.nodeId,"_vote_");
                 localVoted.add(ballot.blockId);
                 p2p.publish(ballot);
-                
+                    
             }
         }
 //        this.p2p.publish();
@@ -265,19 +286,64 @@ switch (option) {
     
     public List<String> localVoted = new ArrayList<>();
     public List<String> localAccepted = new ArrayList<>();
-   
+    
+    
     
     public void receiveBallot(Ballot tempBallot){
         
+//                ballot.vote(this.nodeId,"_vote_");
+//                localVoted.add(ballot.blockId);
+//                System.out.println("not contains: "+!localVoted.contains(tempBallot));
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                if(!localVoted.contains(tempBallot.blockId)){
+                    localVoted.add(tempBallot.blockId);
+                    p2p.publish(tempBallot);
+                    
+                    FileWriter fileWriter = null;
+                    
+                    try {
+                        System.out.println("VOTED");
+                        fileWriter = new FileWriter("../../voting.txt", true);
+                        fileWriter.write("_vote_:"+this.nodeId+"\n");
+                        fileWriter.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                }
+//                 && !alreadyConsensed
+                if(this.canvasVotes()){
+                    tempBallot.voted = true;
+                    System.out.println("CONSENSUS REACHED");
+                }
+                if(!tempBallot.voted){
+                    p2p.publish(tempBallot);
+                }
+                
+                
+        
+//            if(tempBallot.canvass("_vote_")){
+//                System.out.println("REACHED CONSENSUS");
+//            }else{
+//                System.out.println("111111111111111");
+//                if(localVoted.isEmpty() || !localVoted.contains(tempBallot.blockId)){
+//                    System.out.println("222222222222222");
+//                    tempBallot.vote(nodeId, "_vote_");
+////                    System.out.println("4444444444444444: "+tempBallot.blockId);
+//                    localVoted.add(tempBallot.blockId);
+////                    System.out.println("555555555555555555");
+//                }
+//                System.out.println("33333333333333333");
+//                p2p.publish(tempBallot);
+//            }
             
-            if(tempBallot.canvass("_vote_")){
-                System.out.println("REACHED CONSENSUS");
-            }else{
-                tempBallot.vote(nodeId, "_vote_");
-                p2p.publish(tempBallot);
-            }
         
-        
+    
 //        System.out.println("RECEIVED BALLOT");
 //        
 //        boolean consensus = false;
@@ -454,6 +520,28 @@ switch (option) {
 //                }
 //            }
 //        }
+    }
+    
+    public boolean canvasVotes() {
+        List<String> lines = new ArrayList<>();
+        int counter = 0;
+        try{
+            File file = new File("../../voting.txt"); 
+            Scanner sc = new Scanner(file); 
+
+            while (sc.hasNextLine()){
+                counter++;
+                lines.add(sc.nextLine());
+            }
+            
+            if(counter-1 >= (TOTAL_NODES/3)*2){
+                return true;
+            }
+            
+        }catch(Exception X){
+            System.out.println("Error: "+X.getMessage());
+        }
+        return false;
     }
     
     public Block blockFromBallot(Ballot tempBallot){

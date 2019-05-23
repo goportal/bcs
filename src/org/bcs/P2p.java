@@ -58,7 +58,8 @@ public class P2p {
                                     
                                 }
                             } catch (Exception X) {
-                                System.err.println("ERROR: " + X.getMessage());
+//                                X.printStackTrace(new java.io.PrintStream(System.out));
+                                System.out.println("ERROR: " + X.getMessage());
                             }
                         }).start();
 

@@ -15,6 +15,7 @@ public class Ballot implements Serializable{
     public List<String> nodesAccepts = new ArrayList<>();
     public List<String> nodesVotes = new ArrayList<>();
     public String blockId;
+    public boolean voted = false;
 //    public String vote;
     public int nodes;
     
