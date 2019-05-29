@@ -61,6 +61,8 @@ String number;
             System.out.println(" 6 - List connected nodes");
             System.out.println(" 7 - Print unvalidated blocks");
             System.out.println(" 8 - Start Voting");
+            System.out.println(" 9 - Print Voted Blocks");
+            System.out.println(" 10 - Start Accepting");
 
             String opAux = sysIn.nextLine();
             
@@ -203,14 +205,7 @@ switch (option) {
     case 10:
         
                 
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter("../../ballots/voting.txt", false);
-            fileWriter.write("");
-            fileWriter.close();
-        } catch (IOException ex) {
-            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        startAccept();
         
         
         break;
@@ -344,18 +339,11 @@ switch (option) {
 
             if(!localAccepted.contains(tempBallot.blockId)){
                 localAccepted.add(tempBallot.blockId);
+                writeInBallot("_accept_");
                 p2p.publish(tempBallot);
 
-                FileWriter fileWriter = null;
-
-                try {
-                    System.out.println("ACCEPTED");
-                    fileWriter = new FileWriter("../../ballots/voting.txt", true);
-                    fileWriter.write("_accept_:"+this.nodeId+"\n");
-                    fileWriter.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                System.out.println("ACCEPTED");
+                
 
             }
 
@@ -382,18 +370,10 @@ switch (option) {
 
             if(!localVoted.contains(tempBallot.blockId)){
                 localVoted.add(tempBallot.blockId);
+                writeInBallot("_vote_");
                 p2p.publish(tempBallot);
-
-                FileWriter fileWriter = null;
-
-                try {
-                    System.out.println("VOTED");
-                    fileWriter = new FileWriter("../../ballots/voting.txt", true);
-                    fileWriter.write("_vote_:"+this.nodeId+"\n");
-                    fileWriter.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                System.out.println("VOTED");
+                
 
             }
 
@@ -403,7 +383,8 @@ switch (option) {
                 if(ether.get(0)!=null){
                     voted.add(ether.get(0));
                     ether.remove(ether.get(0));
-                    tempBallot.voted = true;
+//                    tempBallot.voted = true;
+                    p2p.publish(tempBallot);
                 }
 
             }
@@ -416,10 +397,30 @@ switch (option) {
            
     }
     
+    
+    public void startAccept(){
+        ballot = new Ballot(voted.get(0).getHash(),TOTAL_NODES);
+        ballot.voted = true;
+        receiveBallot(ballot);
+        
+    }
+    
     public void sleep(int time){
         try {
             Thread.sleep(time);
         } catch (InterruptedException ex) {
+            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void writeInBallot(String type){
+        FileWriter fileWriter = null;
+        try {
+            
+            fileWriter = new FileWriter("../../ballots/voting.txt", true);
+            fileWriter.write(type+":"+this.nodeId+"\n");
+            fileWriter.close();
+        } catch (IOException ex) {
             Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
