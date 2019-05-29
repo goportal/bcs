@@ -195,25 +195,7 @@ switch (option) {
         
     case 9:
         
-        localVoted = new ArrayList<>();
-        
-//        localVoted.add("A");
-        
-        localVoted.add("B");
-        
-        if(localVoted.contains("A")){
-            System.out.println("contains A");
-        
-        }else{
-            System.out.println("Not Contains A");
-        }
-        
-        if(localVoted.contains("B")){
-            System.out.println("Contains B");
-        }else{
-            System.out.println("Not Contains B");
-        }
-        
+        printVoted();
         
         
         break;
@@ -299,6 +281,9 @@ switch (option) {
     }
     
     private List<Block> ether = new ArrayList<>();
+    private List<Block> voted = new ArrayList<>();
+    
+    
 //    private List<String> acceptedBlocks = new ArrayList<>();
     private Ballot ballot;
     
@@ -344,51 +329,91 @@ switch (option) {
     
     public List<String> localVoted = new ArrayList<>();
     public List<String> localVotedConfirmed = new ArrayList<>();
-    
+   
     public List<String> localAccepted = new ArrayList<>();
-    
+    public List<String> localAcceptedConfirmed = new ArrayList<>();
     
     
     public void receiveBallot(Ballot tempBallot){
         
-//                ballot.vote(this.nodeId,"_vote_");
-//                localVoted.add(ballot.blockId);
-//                System.out.println("not contains: "+!localVoted.contains(tempBallot));
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        sleep(2000);
+        
+        if(tempBallot.voted){
+            // ACCEPTING
+            
+            sleep(2000);
 
-        if(!localVoted.contains(tempBallot.blockId)){
-            localVoted.add(tempBallot.blockId);
-            p2p.publish(tempBallot);
+            if(!localAccepted.contains(tempBallot.blockId)){
+                localAccepted.add(tempBallot.blockId);
+                p2p.publish(tempBallot);
 
-            FileWriter fileWriter = null;
+                FileWriter fileWriter = null;
 
-            try {
-                System.out.println("VOTED");
-                fileWriter = new FileWriter("../../ballots/voting.txt", true);
-                fileWriter.write("_vote_:"+this.nodeId+"\n");
-                fileWriter.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+                try {
+                    System.out.println("ACCEPTED");
+                    fileWriter = new FileWriter("../../ballots/voting.txt", true);
+                    fileWriter.write("_accept_:"+this.nodeId+"\n");
+                    fileWriter.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
-        
+
+            if(this.canvasAccepts() && !localAcceptedConfirmed.contains(tempBallot.blockId)){
+                localAcceptedConfirmed.add(tempBallot.blockId);
+                System.out.println("BLOCK ACCEPTED");
+                if(voted.get(0)!=null){
+                    blockchain.addBlock(voted.get(0));
+                    voted.remove(voted.get(0));
+//                    ether.remove(ether.get(0));
+//                    tempBallot.voted = true;
+                }
+
+            }
+
+            if(!localAcceptedConfirmed.contains(tempBallot.blockId)){
+                p2p.publish(tempBallot);
+            }
+            
+        }else{
+            // VOTING
+            
+            sleep(2000);
+
+            if(!localVoted.contains(tempBallot.blockId)){
+                localVoted.add(tempBallot.blockId);
+                p2p.publish(tempBallot);
+
+                FileWriter fileWriter = null;
+
+                try {
+                    System.out.println("VOTED");
+                    fileWriter = new FileWriter("../../ballots/voting.txt", true);
+                    fileWriter.write("_vote_:"+this.nodeId+"\n");
+                    fileWriter.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+            if(this.canvasVotes() && !localVotedConfirmed.contains(tempBallot.blockId)){
+                localVotedConfirmed.add(tempBallot.blockId);
+                System.out.println("CONSENSUS REACHED");
+                if(ether.get(0)!=null){
+                    voted.add(ether.get(0));
+                    ether.remove(ether.get(0));
+                    tempBallot.voted = true;
+                }
+
+            }
+
+            if(!localVotedConfirmed.contains(tempBallot.blockId)){
+                p2p.publish(tempBallot);
+            }
+
         }
-        
-        
-        if(this.canvasVotes() && !localVotedConfirmed.contains(tempBallot.blockId)){
-            localVotedConfirmed.add(tempBallot.blockId);
-            System.out.println("CONSENSUS REACHED");
            
-        }
-        
-        if(!localVotedConfirmed.contains(tempBallot.blockId)){
-            p2p.publish(tempBallot);
-        }
-        
     }
     
     public void sleep(int time){
@@ -443,6 +468,32 @@ switch (option) {
             while (sc.hasNextLine()){
                 counter++;
                 lines.add(sc.nextLine());
+            }
+            
+            if(counter-1 >= (TOTAL_NODES/3)*2){
+                return true;
+            }
+            
+        }catch(Exception X){
+            System.out.println("Error: "+X.getMessage());
+        }
+        return false;
+    }
+    
+    public boolean canvasAccepts() {
+        List<String> lines = new ArrayList<>();
+        float counter = 0;
+        try{
+            File file = new File("../../ballots/voting.txt"); 
+            Scanner sc = new Scanner(file); 
+
+            while (sc.hasNextLine()){
+                String [] tempStr = sc.nextLine().split(":");
+                if(tempStr[0].equals("_accept_")){
+                    counter++;
+                    lines.add(sc.nextLine());
+                }
+                
             }
             
             if(counter-1 >= (TOTAL_NODES/3)*2){
@@ -533,6 +584,13 @@ switch (option) {
 //        System.out.println(retString);
         return retString.toString();
     }
+    
+    public void printVoted(){
+        for (int i = 0; i < voted.size(); i++) {
+            System.out.println("Voted: "+voted.get(i).getData());
+        }
+    }
+    
     
 }
 
