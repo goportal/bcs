@@ -20,8 +20,12 @@ import java.util.logging.Logger;
  *
  * @author Portal
  */
+
+
 public class Node {
     
+    
+String number;
 //    private List<Block> underVote = new ArrayList<>();
 //    private List<Ballot> ballots = new ArrayList<>();
     
@@ -115,6 +119,26 @@ switch (option) {
         break;
         
     case 4:
+        
+//        FileWriter fileWriter = null;
+//        try {
+//            fileWriter = new FileWriter("../../ballots/voting.txt", false);
+//            fileWriter.write("");
+//            fileWriter.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//                
+//        FileWriter fileWriter2 = null;
+//        try {
+//            fileWriter2 = new FileWriter("../../ballots/votingConfirm.txt", false);
+//            fileWriter2.write("");
+//            fileWriter2.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+                
+                
         System.exit(0);
         
         run = false;
@@ -171,7 +195,43 @@ switch (option) {
         
     case 9:
         
-        canvasVotes();
+        localVoted = new ArrayList<>();
+        
+//        localVoted.add("A");
+        
+        localVoted.add("B");
+        
+        if(localVoted.contains("A")){
+            System.out.println("contains A");
+        
+        }else{
+            System.out.println("Not Contains A");
+        }
+        
+        if(localVoted.contains("B")){
+            System.out.println("Contains B");
+        }else{
+            System.out.println("Not Contains B");
+        }
+        
+        
+        
+        break;
+        
+    case 10:
+        
+                
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter("../../ballots/voting.txt", false);
+            fileWriter.write("");
+            fileWriter.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        break;
         
         
 //        Ballot ballotin = new Ballot(ether.get(0).getHash(), 4);
@@ -228,8 +288,6 @@ switch (option) {
 //        ballotin.canvass("vote");
         
         
-        break;
-        
     default:
         System.out.println("Wrong choice! try again.");
         break;
@@ -252,7 +310,7 @@ switch (option) {
         }
     }
     
-    public int TOTAL_NODES = 4;
+    public float TOTAL_NODES = 4;
     
     public void startBallot(){
         
@@ -263,11 +321,11 @@ switch (option) {
                 
                 FileWriter fileWriter = null;
                 try {
-                    System.out.println("VOTED");
-                    fileWriter = new FileWriter("../../voting.txt", true);
+                    fileWriter = new FileWriter("../../ballots/voting.txt", true);
                     fileWriter.write("node:"+ether.get(0)+"\n");
                     fileWriter.write("_vote_:"+this.nodeId+"\n");
                     fileWriter.close();
+                    System.out.println("VOTED");
                 } catch (IOException ex) {
                     Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -275,7 +333,7 @@ switch (option) {
                 ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
                 localVoted.add(ballot.blockId);
                 p2p.publish(ballot);
-                    
+                
             }
         }
 //        this.p2p.publish();
@@ -285,6 +343,8 @@ switch (option) {
     
     
     public List<String> localVoted = new ArrayList<>();
+    public List<String> localVotedConfirmed = new ArrayList<>();
+    
     public List<String> localAccepted = new ArrayList<>();
     
     
@@ -294,39 +354,298 @@ switch (option) {
 //                ballot.vote(this.nodeId,"_vote_");
 //                localVoted.add(ballot.blockId);
 //                System.out.println("not contains: "+!localVoted.contains(tempBallot));
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-                if(!localVoted.contains(tempBallot.blockId)){
-                    localVoted.add(tempBallot.blockId);
-                    p2p.publish(tempBallot);
-                    
-                    FileWriter fileWriter = null;
-                    
-                    try {
-                        System.out.println("VOTED");
-                        fileWriter = new FileWriter("../../voting.txt", true);
-                        fileWriter.write("_vote_:"+this.nodeId+"\n");
-                        fileWriter.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    
-                }
-//                 && !alreadyConsensed
-                if(this.canvasVotes()){
-                    tempBallot.voted = true;
-                    System.out.println("CONSENSUS REACHED");
-                }
-                if(!tempBallot.voted){
-                    p2p.publish(tempBallot);
-                }
-                
-                
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        sleep(2000);
+
+        if(!localVoted.contains(tempBallot.blockId)){
+            localVoted.add(tempBallot.blockId);
+            p2p.publish(tempBallot);
+
+            FileWriter fileWriter = null;
+
+            try {
+                System.out.println("VOTED");
+                fileWriter = new FileWriter("../../ballots/voting.txt", true);
+                fileWriter.write("_vote_:"+this.nodeId+"\n");
+                fileWriter.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+            }
         
+        }
+        
+        
+        if(this.canvasVotes() && !localVotedConfirmed.contains(tempBallot.blockId)){
+            localVotedConfirmed.add(tempBallot.blockId);
+            System.out.println("CONSENSUS REACHED");
+           
+        }
+        
+        if(!localVotedConfirmed.contains(tempBallot.blockId)){
+            p2p.publish(tempBallot);
+        }
+        
+    }
+    
+    public void sleep(int time){
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+//    public void confirmVote(){
+//        FileWriter fileWriter = null;
+//        try {
+//            fileWriter = new FileWriter("../../ballots/votingConfirm.txt", true);
+//            fileWriter.write("_vote_:"+this.nodeId+"\n");
+//            fileWriter.close();
+////            System.out.println("VOTED");
+//        } catch (IOException ex) {
+//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
+//    
+//    public boolean checkConfirmVote(){
+//        List<String> lines = new ArrayList<>();
+//        int counter = 0;
+//        try{
+//            File file = new File("../../ballots/votingConfirm.txt"); 
+//            Scanner sc = new Scanner(file); 
+//
+//            while (sc.hasNextLine()){
+//                
+//                String [] tempStr = sc.nextLine().split(":");
+//                if(tempStr.equals(this.nodeId)){
+//                    return true;
+//                }
+//                
+//            }
+//            
+//        }catch(Exception X){
+//            System.out.println("Error: "+X.getMessage());
+//        }
+//        return false;
+//    }
+    
+    public boolean canvasVotes() {
+        List<String> lines = new ArrayList<>();
+        float counter = 0;
+        try{
+            File file = new File("../../ballots/voting.txt"); 
+            Scanner sc = new Scanner(file); 
+
+            while (sc.hasNextLine()){
+                counter++;
+                lines.add(sc.nextLine());
+            }
+            
+            if(counter-1 >= (TOTAL_NODES/3)*2){
+                return true;
+            }
+            
+        }catch(Exception X){
+            System.out.println("Error: "+X.getMessage());
+        }
+        return false;
+    }
+    
+    public boolean alreadyVoted(){
+        List<String> lines = new ArrayList<>();
+        int counter = 0;
+        try{
+            File file = new File("../../ballots/voting.txt"); 
+            Scanner sc = new Scanner(file); 
+
+            while (sc.hasNextLine()){
+                String [] tempStr = sc.nextLine().split(":");
+                if(tempStr.equals(this.nodeId)){
+                    return true;
+                }
+            }
+            
+        }catch(Exception X){
+            System.out.println("Error: "+X.getMessage());
+        }
+        return false;
+    }
+    
+    
+    public Block blockFromBallot(Ballot tempBallot){
+        Block tempBlock = null;
+        for(int i=0;i<this.ether.size();i++){
+            if(ether.get(i).getHash().equals(tempBallot.blockId)){
+                tempBlock = ether.get(i);
+                ether.remove(i);
+            }
+        }
+        return tempBlock;
+    }
+    
+    public boolean etherHasBlock(Block tempBlock){
+        for (int i = 0; i < this.ether.size(); i++) {
+            if(this.ether.get(i).getHash().equals(tempBlock.getHash())){
+//                System.out.println("HASH 1 => "+this.ether.get(i).getHash());
+//                System.out.println("HASH 2 => "+tempBlock.getHash());
+                return true;
+            }
+        }
+        return false;
+    }
+    
+//    public boolean alreadyAcceptedBlock(String tempBlockId){
+//        for (int i = 0; i < this.acceptedBlocks.size(); i++) {
+//            if(tempBlockId.equals(acceptedBlocks.get(i))){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+//    
+//    public void markAcceptedBlock(String tempBlockId){
+//        this.acceptedBlocks.add(tempBlockId);
+//    }
+//   
+    public boolean isNumber( String s ) {
+        
+        char[] c = s.toCharArray();
+        boolean d = true;
+        for ( int i = 0; i < c.length; i++ )
+            
+            if ( !Character.isDigit( c[ i ] ) ) {
+                d = false;
+                break;
+            }
+        return d;
+    }
+    
+    public String getStringFromKeys(PublicKey tempKey){
+        byte[] publicKey = tempKey.getEncoded();
+        StringBuffer retString = new StringBuffer();
+        for (int i = 0; i < publicKey.length; ++i) {
+            retString.append(Integer.toHexString(0x0100 + (publicKey[i] & 0x00FF)).substring(1));
+        }
+//        System.out.println(retString);
+        return retString.toString();
+    }
+    
+}
+
+
+// public void startBallot(String type){
+//        
+//        System.out.println("Started new Ballot");
+//        if(!ether.isEmpty()){
+//            if(!blockchain.haveBlock(ether.get(0).getHash())){
+//                System.out.println("Valid ballot");
+//                ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
+//                
+//                if(!ballot.hasVoted(nodeId,type)){
+//                    System.out.println("Voting in new Ballot");
+//                    ballot.vote(this.nodeId,type);
+//                    p2p.publish(ballot);
+//                }
+//            }
+//        }
+////        this.p2p.publish();
+//    }
+//    
+//    boolean alreadyAccepted = false;
+//    
+//    public void ballotConsensus(Ballot tempBallot){
+//        
+//        
+//        if(this.ballot != null){
+//            if(!tempBallot.blockId.equals(ballot.blockId)){
+//                this.ballot = tempBallot;
+//            }
+//        }
+//        
+//        
+//        System.out.println("Received a ballot");
+//        
+//        if(!tempBallot.hasVoted(nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
+//            System.out.println("Ballot not voted");
+//            if(!blockchain.haveBlock(tempBallot.blockId)){
+////                if(!this.alreadyAcceptedBlock(tempBallot.blockId)){
+////                    System.out.println("ALREADY ACCEPTED: "+this.alreadyAcceptedBlock(tempBallot.blockId));
+//                if(!alreadyAccepted){
+//                    System.out.println("Voting in ballot: "+tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
+//                    tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
+//                    this.ballot = tempBallot;
+//                    this.p2p.publish(ballot);
+//                }
+////                }
+//            }
+//            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
+//                System.out.println("BALLOT REACH CONSENSUS");
+//                
+//                if(!ballot.hasVoted(this.nodeId,"_accept_")){
+//                    System.out.println("Voting to _accept_");
+//                    this.ballot.vote(this.nodeId,"_accept_");
+//                    alreadyAccepted = true;
+////                    this.markAcceptedBlock(tempBallot.blockId);
+//                    this.p2p.publish(ballot);
+////                    startBallot("_accept_");
+//                }else{
+//                    if(!blockchain.haveBlock(tempBallot.blockId)){
+//                        System.out.println("ADDING TO THE BLOCKCHAIN ");
+//                        blockchain.addBlock(blockFromBallot(tempBallot));
+//                        alreadyAccepted = false;
+////                        this.ballot = null;
+//                    }
+//                }
+//            }
+//        }else{
+//            System.out.println("Receiving already voted ballot");
+//            if(tempBallot.nodesSignature.size()>this.ballot.nodesSignature.size()){
+//                System.out.println("Updating local ballot");
+//                this.ballot = tempBallot;
+//                this.p2p.publish(ballot);
+//            }
+//            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
+//                System.out.println("BALLOT REACH CONSENSUS (by2)");
+//                if(!ballot.hasVoted(this.nodeId,"_accept_")){
+//                    System.out.println("Voting to _accept_ (by2)");
+////                    tempBallot.vote(this.nodeId,"_accept_");
+////                    this.markAcceptedBlock(tempBallot.blockId);
+//                    alreadyAccepted = true;
+//                    this.ballot.vote(this.nodeId,"_accept_");
+//                    this.p2p.publish(ballot);
+//
+////                    startBallot("_accept_");
+//                }else{
+//                    if(!blockchain.haveBlock(tempBallot.blockId)){
+//                        System.out.println("ADDING TO THE BLOCKCHAIN (by2)");
+//                        blockchain.addBlock(blockFromBallot(tempBallot));
+//                        alreadyAccepted = false;
+////                        this.ballot = null;
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+
+
+
+
+
+
+
+// if(!localVotedConfirmed.contains(tempBallot.blockId)){
+
+
+//                    p2p.publish(tempBallot);
+//                }
+                
+                
+                
 //            if(tempBallot.canvass("_vote_")){
 //                System.out.println("REACHED CONSENSUS");
 //            }else{
@@ -520,181 +839,3 @@ switch (option) {
 //                }
 //            }
 //        }
-    }
-    
-    public boolean canvasVotes() {
-        List<String> lines = new ArrayList<>();
-        int counter = 0;
-        try{
-            File file = new File("../../voting.txt"); 
-            Scanner sc = new Scanner(file); 
-
-            while (sc.hasNextLine()){
-                counter++;
-                lines.add(sc.nextLine());
-            }
-            
-            if(counter-1 >= (TOTAL_NODES/3)*2){
-                return true;
-            }
-            
-        }catch(Exception X){
-            System.out.println("Error: "+X.getMessage());
-        }
-        return false;
-    }
-    
-    public Block blockFromBallot(Ballot tempBallot){
-        Block tempBlock = null;
-        for(int i=0;i<this.ether.size();i++){
-            if(ether.get(i).getHash().equals(tempBallot.blockId)){
-                tempBlock = ether.get(i);
-                ether.remove(i);
-            }
-        }
-        return tempBlock;
-    }
-    
-    public boolean etherHasBlock(Block tempBlock){
-        for (int i = 0; i < this.ether.size(); i++) {
-            if(this.ether.get(i).getHash().equals(tempBlock.getHash())){
-//                System.out.println("HASH 1 => "+this.ether.get(i).getHash());
-//                System.out.println("HASH 2 => "+tempBlock.getHash());
-                return true;
-            }
-        }
-        return false;
-    }
-    
-//    public boolean alreadyAcceptedBlock(String tempBlockId){
-//        for (int i = 0; i < this.acceptedBlocks.size(); i++) {
-//            if(tempBlockId.equals(acceptedBlocks.get(i))){
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//    
-//    public void markAcceptedBlock(String tempBlockId){
-//        this.acceptedBlocks.add(tempBlockId);
-//    }
-//   
-    public boolean isNumber( String s ) {
-        
-        char[] c = s.toCharArray();
-        boolean d = true;
-        for ( int i = 0; i < c.length; i++ )
-            
-            if ( !Character.isDigit( c[ i ] ) ) {
-                d = false;
-                break;
-            }
-        return d;
-    }
-    
-    public String getStringFromKeys(PublicKey tempKey){
-        byte[] publicKey = tempKey.getEncoded();
-        StringBuffer retString = new StringBuffer();
-        for (int i = 0; i < publicKey.length; ++i) {
-            retString.append(Integer.toHexString(0x0100 + (publicKey[i] & 0x00FF)).substring(1));
-        }
-//        System.out.println(retString);
-        return retString.toString();
-    }
-    
-}
-
-
-// public void startBallot(String type){
-//        
-//        System.out.println("Started new Ballot");
-//        if(!ether.isEmpty()){
-//            if(!blockchain.haveBlock(ether.get(0).getHash())){
-//                System.out.println("Valid ballot");
-//                ballot = new Ballot(ether.get(0).getHash(),TOTAL_NODES);
-//                
-//                if(!ballot.hasVoted(nodeId,type)){
-//                    System.out.println("Voting in new Ballot");
-//                    ballot.vote(this.nodeId,type);
-//                    p2p.publish(ballot);
-//                }
-//            }
-//        }
-////        this.p2p.publish();
-//    }
-//    
-//    boolean alreadyAccepted = false;
-//    
-//    public void ballotConsensus(Ballot tempBallot){
-//        
-//        
-//        if(this.ballot != null){
-//            if(!tempBallot.blockId.equals(ballot.blockId)){
-//                this.ballot = tempBallot;
-//            }
-//        }
-//        
-//        
-//        System.out.println("Received a ballot");
-//        
-//        if(!tempBallot.hasVoted(nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
-//            System.out.println("Ballot not voted");
-//            if(!blockchain.haveBlock(tempBallot.blockId)){
-////                if(!this.alreadyAcceptedBlock(tempBallot.blockId)){
-////                    System.out.println("ALREADY ACCEPTED: "+this.alreadyAcceptedBlock(tempBallot.blockId));
-//                if(!alreadyAccepted){
-//                    System.out.println("Voting in ballot: "+tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
-//                    tempBallot.vote(this.nodeId,tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1));
-//                    this.ballot = tempBallot;
-//                    this.p2p.publish(ballot);
-//                }
-////                }
-//            }
-//            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
-//                System.out.println("BALLOT REACH CONSENSUS");
-//                
-//                if(!ballot.hasVoted(this.nodeId,"_accept_")){
-//                    System.out.println("Voting to _accept_");
-//                    this.ballot.vote(this.nodeId,"_accept_");
-//                    alreadyAccepted = true;
-////                    this.markAcceptedBlock(tempBallot.blockId);
-//                    this.p2p.publish(ballot);
-////                    startBallot("_accept_");
-//                }else{
-//                    if(!blockchain.haveBlock(tempBallot.blockId)){
-//                        System.out.println("ADDING TO THE BLOCKCHAIN ");
-//                        blockchain.addBlock(blockFromBallot(tempBallot));
-//                        alreadyAccepted = false;
-////                        this.ballot = null;
-//                    }
-//                }
-//            }
-//        }else{
-//            System.out.println("Receiving already voted ballot");
-//            if(tempBallot.nodesSignature.size()>this.ballot.nodesSignature.size()){
-//                System.out.println("Updating local ballot");
-//                this.ballot = tempBallot;
-//                this.p2p.publish(ballot);
-//            }
-//            if(ballot.ballotCanvass(tempBallot.nodesVotes.get(tempBallot.nodesVotes.size()-1))){
-//                System.out.println("BALLOT REACH CONSENSUS (by2)");
-//                if(!ballot.hasVoted(this.nodeId,"_accept_")){
-//                    System.out.println("Voting to _accept_ (by2)");
-////                    tempBallot.vote(this.nodeId,"_accept_");
-////                    this.markAcceptedBlock(tempBallot.blockId);
-//                    alreadyAccepted = true;
-//                    this.ballot.vote(this.nodeId,"_accept_");
-//                    this.p2p.publish(ballot);
-//
-////                    startBallot("_accept_");
-//                }else{
-//                    if(!blockchain.haveBlock(tempBallot.blockId)){
-//                        System.out.println("ADDING TO THE BLOCKCHAIN (by2)");
-//                        blockchain.addBlock(blockFromBallot(tempBallot));
-//                        alreadyAccepted = false;
-////                        this.ballot = null;
-//                    }
-//                }
-//            }
-//        }
-//    }

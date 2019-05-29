@@ -17,9 +17,9 @@ public class Ballot implements Serializable{
     public String blockId;
     public boolean voted = false;
 //    public String vote;
-    public int nodes;
+    public float nodes;
     
-    public Ballot(String blockId, int nodes){
+    public Ballot(String blockId, float nodes){
 //        this.nodeId = nodeId;
         this.blockId = blockId;
 //        this.vote = vote;
