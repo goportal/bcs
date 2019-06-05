@@ -41,7 +41,8 @@ String number;
 //    Thread server = new Thread(cServer);
     Scanner sysIn = new Scanner(System.in);
     
-    
+//    String qSlice = "";
+    private List<String> qSlice = new ArrayList<>();
 //    private List<String> qSlices = new ArrayList<>();
     
     public void run() {
@@ -52,7 +53,7 @@ String number;
             System.out.println("Choose the option:");
             System.out.println(" 0 - Add a new block");
             System.out.println(" 1 - Print the blockchain");
-            System.out.println(" 2 - Validate chain");
+            System.out.println(" 2 - Choose quorum slice");
 //            System.out.println(" 3 - Check for blockchain updates");
             System.out.println(" 3 - Tamper the chain");
             System.out.println(" 4 - Exit");
@@ -61,8 +62,8 @@ String number;
             System.out.println(" 6 - List connected nodes");
             System.out.println(" 7 - Print unvalidated blocks");
             System.out.println(" 8 - Start Voting");
-            System.out.println(" 9 - Print Voted Blocks");
-            System.out.println(" 10 - Start Accepting");
+//            System.out.println(" 9 - Print Voted Blocks");
+//            System.out.println(" 10 - Start Accepting");
 
             String opAux = sysIn.nextLine();
             
@@ -110,11 +111,18 @@ switch (option) {
         break;
         
     case 2:
-        if (blockchain.isValid()) {
-            System.out.println("The blockchain is valid!");
-        } else {
-            System.out.println("The blockchain is invalid!");
-        }
+        
+        System.out.println("Type the quorum name:");
+        
+        
+        String strAux = sysIn.nextLine();
+        qSlice.add(strAux);
+        
+//        if (blockchain.isValid()) {
+//            System.out.println("The blockchain is valid!");
+//        } else {
+//            System.out.println("The blockchain is invalid!");
+//        }
         break;
         
     case 3:
@@ -129,26 +137,7 @@ switch (option) {
         
         break;
         
-    case 4:
-        
-//        FileWriter fileWriter = null;
-//        try {
-//            fileWriter = new FileWriter("../../ballots/voting.txt", false);
-//            fileWriter.write("");
-//            fileWriter.close();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//                
-//        FileWriter fileWriter2 = null;
-//        try {
-//            fileWriter2 = new FileWriter("../../ballots/votingConfirm.txt", false);
-//            fileWriter2.write("");
-//            fileWriter2.close();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-                
+    case 4:  
                 
         System.exit(0);
         
@@ -174,27 +163,9 @@ switch (option) {
         
     case 7:
         
-//                    KeyPair keys = this.utils.generateKeyPair();
-//
-//                    PublicKey pubKey = keys.getPublic();
-//                    PrivateKey privKey = keys.getPrivate();
-//
-//                    String content = "This is a text";
-//
-//                    System.out.println("plain text is: "+ content);
-//
-//                    byte[] cyText = utils.criptografa(content, pubKey);
-//
-//                    System.out.println("The encripted text is: "+cyText.toString());
-//
-//                    String decripted = utils.decriptografa(cyText, privKey);
-//
-//                    System.out.println("The decripted text is: "+decripted);
-        
         for (int i = 0; i < ether.size(); i++) {
-            System.out.println("Ether block: "+ether.get(i).getData());
+            System.out.println("Block pool: "+ether.get(i).getData());
         }
-        
         
         break;
         
@@ -259,7 +230,7 @@ switch (option) {
                 
                 FileWriter fileWriter = null;
                 try {
-                    fileWriter = new FileWriter("../../ballots/votes.txt", true);
+                    fileWriter = new FileWriter("../../ballots/"+qSlice.get(0)+".txt", true);
                     fileWriter.write("node:"+ether.get(0)+"\n");
                     fileWriter.write("_vote_:"+this.nodeId+"\n");
                     fileWriter.close();
@@ -285,67 +256,70 @@ switch (option) {
     
     public void receiveBallot(Ballot tempBallot){
         
-        if(tempBallot.voted){
-            // ACCEPTING
-            
-//            sleep(2000);
-
-            if(!localAccepted.contains(tempBallot.blockId)){
-
-                localAccepted.add(tempBallot.blockId);
-                writeInBallot("_accept_");
-                p2p.publish(tempBallot);
-
-                System.out.println("ACCEPTED");
-                
-
-            }
-
-            if(this.canvasAccepts() && !localAcceptedConfirmed.contains(tempBallot.blockId)){
-
-                localAcceptedConfirmed.add(tempBallot.blockId);
-                System.out.println("ADDING BLOCK TO BLOCKCHAIN");
-                if(voted.get(0)!=null){
-                    blockchain.addBlock(voted.get(0));
-                    voted.remove(voted.get(0));
-                }
-
-            }
-
-            if(!localAcceptedConfirmed.contains(tempBallot.blockId)){
-                p2p.publish(tempBallot);
-            }
+        if(qSlice.size()>1){
             
         }else{
-            // VOTING
-            
-            sleep(2000);
+        
+            if(tempBallot.voted){
+                // ACCEPTING
 
-            if(!localVoted.contains(tempBallot.blockId)){
-                localVoted.add(tempBallot.blockId);
-                writeInBallot("_vote_");
-                p2p.publish(tempBallot);
-                System.out.println("VOTED");
-                
+    //            sleep(2000);
 
-            }
+                if(!localAccepted.contains(tempBallot.blockId)){
 
-            if(this.canvasVotes() && !localVotedConfirmed.contains(tempBallot.blockId)){
-                localVotedConfirmed.add(tempBallot.blockId);
-                System.out.println("CONSENSUS REACHED");
-                if(ether.get(0)!=null){
-                    voted.add(ether.get(0));
-                    ether.remove(ether.get(0));
-                    startAccept();
-//                    p2p.publish(tempBallot);
+                    localAccepted.add(tempBallot.blockId);
+                    writeInBallot("_accept_");
+                    p2p.publish(tempBallot);
+
+                    System.out.println("ACCEPTED");
+
+                }
+
+                if(this.canvasAccepts() && !localAcceptedConfirmed.contains(tempBallot.blockId)){
+
+                    localAcceptedConfirmed.add(tempBallot.blockId);
+                    System.out.println("ADDING BLOCK TO BLOCKCHAIN");
+                    if(voted.get(0)!=null){
+                        blockchain.addBlock(voted.get(0));
+                        voted.remove(voted.get(0));
+                    }
+
+                }
+
+                if(!localAcceptedConfirmed.contains(tempBallot.blockId)){
+                    p2p.publish(tempBallot);
+                }
+
+            }else{
+                // VOTING
+
+                sleep(2000);
+
+                if(!localVoted.contains(tempBallot.blockId)){
+                    localVoted.add(tempBallot.blockId);
+                    writeInBallot("_vote_");
+                    p2p.publish(tempBallot);
+                    System.out.println("VOTED");
+
+                }
+
+                if(this.canvasVotes() && !localVotedConfirmed.contains(tempBallot.blockId)){
+                    localVotedConfirmed.add(tempBallot.blockId);
+                    System.out.println("CONSENSUS REACHED");
+                    if(ether.get(0)!=null){
+                        voted.add(ether.get(0));
+                        ether.remove(ether.get(0));
+                        startAccept();
+    //                    p2p.publish(tempBallot);
+                    }
+
+                }
+
+                if(!localVotedConfirmed.contains(tempBallot.blockId)){
+                    p2p.publish(tempBallot);
                 }
 
             }
-
-            if(!localVotedConfirmed.contains(tempBallot.blockId)){
-                p2p.publish(tempBallot);
-            }
-
         }
            
     }
@@ -366,28 +340,45 @@ switch (option) {
     }
     
     public void writeInBallot(String type){
+        
         FileWriter fileWriter = null;
         try {
-            if(!voted.isEmpty()){
-                fileWriter = new FileWriter("../../ballots/votes.txt", true);
-            }else{
-                fileWriter = new FileWriter("../../ballots/votes.txt", true);
-            }
+//            if(qSlice.size()>1){
+                
+                if(slicesConsensed()){
+                    for (int i = 0; i < qSlice.size(); i++) {
+                        fileWriter = new FileWriter("../../ballots/"+qSlice.get(i)+".txt", true);
+                        fileWriter.write(type+":"+this.nodeId+"\n");
+                        fileWriter.close();
+                    }
+                }
+                
+//            }else{
+////                if(!voted.isEmpty()){
+//                fileWriter = new FileWriter("../../ballots/"+qSlice.get(0)+".txt", true);
+////                }else{
+////                    fileWriter = new FileWriter("../../ballots/"+qSlice+".txt", true);
+////                }
+//            
+//                fileWriter.write(type+":"+this.nodeId+"\n");
+//                fileWriter.close();
+//            }   
             
-            fileWriter.write(type+":"+this.nodeId+"\n");
-            fileWriter.close();
         } catch (IOException ex) {
             System.out.println("WRITE BALLOT ERROR");
             Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    public boolean slicesConsensed(){
+        return true;
+    }
     
     public boolean canvasVotes() {
         List<String> lines = new ArrayList<>();
         float counter = 0;
         try{
-            File file = new File("../../ballots/votes.txt"); 
+            File file = new File("../../ballots/"+qSlice.get(0)+".txt"); 
             Scanner sc = new Scanner(file); 
 
             while (sc.hasNextLine()){
@@ -410,7 +401,7 @@ switch (option) {
         List<String> lines = new ArrayList<>();
         float counter = 0;
         try{
-            File file = new File("../../ballots/votes.txt");
+            File file = new File("../../ballots/"+qSlice.get(0)+".txt");
             Scanner sc = new Scanner(file); 
 
             while (sc.hasNextLine()){
@@ -437,7 +428,7 @@ switch (option) {
         List<String> lines = new ArrayList<>();
         int counter = 0;
         try{
-            File file = new File("../../ballots/votes.txt"); 
+            File file = new File("../../ballots/"+qSlice+".txt"); 
             Scanner sc = new Scanner(file); 
 
             while (sc.hasNextLine()){
